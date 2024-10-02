@@ -28,8 +28,7 @@ const exitRoutes = require('./routes/exits');
 
 const MongoDBStore = require("connect-mongo");
 
-
-const dbUrl = process.env.dbUrl;
+const dbUrl = process.env.DB_URL;
 // const dbUrl = 'mongodb://localhost:27017/clinicaSanR'
 
 
