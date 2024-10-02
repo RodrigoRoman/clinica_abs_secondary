@@ -30,7 +30,7 @@ const MongoDBStore = require("connect-mongo");
 
 
 const dbUrl = 'mongodb+srv://rroman:WPA4z51CfSWdDyAr@clinicaabssecondary.udowi.mongodb.net/clinicaSanR?retryWrites=true&w=majority&appName=ClinicaAbsSecondary';
-// const dbUrl = 'mongodb://localhost:27017/clinicaSanR';
+// const dbUrl = 'mongodb://localhost:27017/clinicaSanR'
 
 
 
