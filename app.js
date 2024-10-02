@@ -138,12 +138,14 @@ app.use(mongoSanitize({
 }))
 const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
 
-const store = new MongoDBStore({
-    mongoUrl: dbUrl,
-    secret,
-    touchAfter: 8 * 60 * 60
+const store = MongoDBStore.create({
+    mongoUrl: dbUrl || 'mongodb://127.0.0.1:27017/clinicaSanR', // Asegúrate de tener una URL válida
+    secret: secret,
+    touchAfter: 24 * 3600, // Toca la sesión una vez al día
+    crypto: {
+        secret: secret, // Secreto para cifrar
+    }
 });
-
 store.on("error", function (e) {
     console.log("SESSION STORE ERROR", e)
 })
@@ -181,7 +183,7 @@ const scriptSrcUrls = [
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome",
     "https://pure-brushlands-42473.herokuapp.com",
     "https://unpkg.com/",
-    "https://clinicaabasolo2-production.up.railway.app",
+    "https://clinicaabssecondary-production.up.railway.app/",
     "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"
 ];
 const styleSrcUrls = [
@@ -224,47 +226,47 @@ app.use(
 );
 
 //Seed date point from which start to count supplies to be resupplied
-(async () => {
-    const refillCount = await Refill.countDocuments();
-    if (refillCount === 0) {
-        const nDate = getMexicoCityTime()
-        let point = new Refill({
-            name:"datePoint",
-            setPoint:nDate,
-        });
-        point.save(function (err,saved) {
-            if (err) return handleError(err);
-        });
-    }
-    const moneyBoxCount = await MoneyBox.countDocuments();
-    if (moneyBoxCount === 0) {
-            // No money box found, create a new one
-            let moneyBox = new MoneyBox({
-                name: 'Caja Principal',
-            });
+// (async () => {
+//     const refillCount = await Refill.countDocuments();
+//     if (refillCount === 0) {
+//         const nDate = getMexicoCityTime()
+//         let point = new Refill({
+//             name:"datePoint",
+//             setPoint:nDate,
+//         });
+//         point.save(function (err,saved) {
+//             if (err) return handleError(err);
+//         });
+//     }
+//     const moneyBoxCount = await MoneyBox.countDocuments();
+//     if (moneyBoxCount === 0) {
+//             // No money box found, create a new one
+//             let moneyBox = new MoneyBox({
+//                 name: 'Caja Principal',
+//             });
     
-            moneyBox.save(function (err, saved) {
-                if (err) {
-                    console.error("Failed to create default MoneyBox:", err);
-                    return;
-                }
+//             moneyBox.save(function (err, saved) {
+//                 if (err) {
+//                     console.error("Failed to create default MoneyBox:", err);
+//                     return;
+//                 }
     
-                console.log("Default MoneyBox created");
+//                 console.log("Default MoneyBox created");
     
-                // After creation of MoneyBox, set it as the default value for all Users
-                User.updateMany({}, { $set: { moneyBox: saved._id } }, (err, res) => {
-                    if (err) {
-                        console.error("Failed to set default MoneyBox for all users:", err);
-                        return;
-                    }
+//                 // After creation of MoneyBox, set it as the default value for all Users
+//                 User.updateMany({}, { $set: { moneyBox: saved._id } }, (err, res) => {
+//                     if (err) {
+//                         console.error("Failed to set default MoneyBox for all users:", err);
+//                         return;
+//                     }
                     
-                    console.log("Default MoneyBox set for all users");
-                });
-            });
-        } else {
-            console.log("Default MoneyBox already exists");
-        }
-});
+//                     console.log("Default MoneyBox set for all users");
+//                 });
+//             });
+//         } else {
+//             console.log("Default MoneyBox already exists");
+//         }
+// });
 
 
 
