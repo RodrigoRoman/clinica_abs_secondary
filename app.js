@@ -34,9 +34,13 @@ const dbUrl = 'mongodb+srv://rroman:WPA4z51CfSWdDyAr@clinicaabssecondary.udowi.m
 
 
 
-mongoose.connect(dbUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+
+  mongoose.connect(dbUrl)
+  .then(() => {
+    console.log("Database connected successfully");
+  })
+  .catch((err) => {
+    console.error("Database connection error:", err);
   });
 
 function getMexicoCityTime() {
