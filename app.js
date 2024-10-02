@@ -29,19 +29,23 @@ const exitRoutes = require('./routes/exits');
 const MongoDBStore = require("connect-mongo");
 
 
-const dbUrl = 'mongodb+srv://rroman:WPA4z51CfSWdDyAr@clinicaabssecondary.udowi.mongodb.net/clinicaSanR?retryWrites=true&w=majority&appName=ClinicaAbsSecondary';
+const dbUrl = process.env.dbUrl;
 // const dbUrl = 'mongodb://localhost:27017/clinicaSanR'
 
 
 
 
-  mongoose.connect(dbUrl)
-  .then(() => {
-    console.log("Database connected successfully");
+mongoose.connect(dbUrl, {
+    tlsAllowInvalidCertificates: true,  // Desactivar validación de certificados para pruebas
+    tlsAllowInvalidHostnames: true,     // Desactivar validación de hostnames para pruebas
   })
-  .catch((err) => {
-    console.error("Database connection error:", err);
-  });
+    .then(() => {
+      console.log('Database connected successfully');
+    })
+    .catch((err) => {
+      console.error('Database connection error:', err);
+    });
+  
 
 function getMexicoCityTime() {
     const now = new Date();
