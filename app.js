@@ -29,8 +29,7 @@ const exitRoutes = require('./routes/exits');
 const MongoDBStore = require("connect-mongo");
 
 
-const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/clinicaSanR';
-
+const dbUrl = process.env.DB_URL 
 // const dbUrl = 'mongodb://localhost:27017/clinicaSanR';
 
 
@@ -184,8 +183,6 @@ const scriptSrcUrls = [
     "https://unpkg.com/",
     "https://clinicaabasolo2-production.up.railway.app",
     "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"
-
-
 ];
 const styleSrcUrls = [
     "https://maxcdn.bootstrapcdn.com/",
