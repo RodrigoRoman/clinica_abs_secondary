@@ -1,3 +1,5 @@
+
+
 if (process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 
@@ -16,8 +18,6 @@ const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const Refill = require("./models/refillPoint");
 const MoneyBox = require("./models/money_parts");
-const Point = require("./models/refillPoint"); // Import Point model
-
 
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -27,26 +27,18 @@ const patientRoutes = require('./routes/patients');
 const exitRoutes = require('./routes/exits');
 
 const MongoDBStore = require("connect-mongo");
-console.log("Environment Variables:", process.env); // Verificar qué variables están presentes en Railway
-console.log("DB_URL:", process.env.DB_URL); // Verificar específicamente la variable DB_URL
 
-const dbUrl = process.env.DB_URL||"mongodb+srv://rroman:WPA4z51CfSWdDyAr@clinicaabssecondary.udowi.mongodb.net/clinicaSanR?retryWrites=true&w=majority";
-// const dbUrl = 'mongodb://localhost:27017/clinicaSanR
 
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/clinicaSanR';
+
+// const dbUrl = 'mongodb://localhost:27017/clinicaSanR';
 
 
 
 mongoose.connect(dbUrl, {
-    tlsAllowInvalidCertificates: true,  // Desactivar validación de certificados para pruebas
-    tlsAllowInvalidHostnames: true,     // Desactivar validación de hostnames para pruebas
-  })
-    .then(() => {
-      console.log('Database connected successfully');
-    })
-    .catch((err) => {
-      console.error('Database connection error:', err);
-    });
-  
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 
 function getMexicoCityTime() {
     const now = new Date();
@@ -69,57 +61,6 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => {
     console.log("Database connected");
-
-    // Check and create Point document if it doesn't exist
-    (async () => {
-        try {
-            const point = await Point.findOne({ name: "datePoint" });
-            if (!point) {
-                const nDate = getMexicoCityTime();
-                let newPoint = new Point({
-                    name: "datePoint",
-                    setPoint: nDate,
-                    servicesCar: [], // Initialize with an empty array
-                    resupplying: false // Default value
-                });
-
-                await newPoint.save();
-                console.log("Default Point (datePoint) created.");
-            } else {
-                console.log("Point (datePoint) already exists.");
-            }
-
-            // Check and create default Refill and MoneyBox if they don't exist
-            const refillCount = await Refill.countDocuments();
-            if (refillCount === 0) {
-                const nDate = getMexicoCityTime();
-                let point = new Refill({
-                    name: "datePoint",
-                    setPoint: nDate,
-                });
-                await point.save();
-                console.log("Default Refill created.");
-            }
-
-            const moneyBoxCount = await MoneyBox.countDocuments();
-            if (moneyBoxCount === 0) {
-                let moneyBox = new MoneyBox({
-                    name: 'Caja Principal',
-                });
-
-                const savedMoneyBox = await moneyBox.save();
-                console.log("Default MoneyBox created.");
-
-                // Set it as the default value for all Users
-                await User.updateMany({}, { $set: { moneyBox: savedMoneyBox._id } });
-                console.log("Default MoneyBox set for all users.");
-            } else {
-                console.log("Default MoneyBox already exists.");
-            }
-        } catch (err) {
-            console.error("Error in seeding database documents:", err);
-        }
-    })();
 });
 
 const app = express();
@@ -147,14 +88,12 @@ app.use(mongoSanitize({
 }))
 const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
 
-const store = MongoDBStore.create({
-    mongoUrl: dbUrl, // Asegúrate de tener una URL válida
-    secret: secret,
-    touchAfter: 24 * 3600, // Toca la sesión una vez al día
-    crypto: {
-        secret: secret, // Secreto para cifrar
-    }
+const store = new MongoDBStore({
+    mongoUrl: dbUrl,
+    secret,
+    touchAfter: 8 * 60 * 60
 });
+
 store.on("error", function (e) {
     console.log("SESSION STORE ERROR", e)
 })
@@ -205,6 +144,7 @@ const styleSrcUrls = [
     "https://use.fontawesome.com/",
     "https://unpkg.com/",
     "https://unpkg.com/escpos-bluetooth",
+    "https://clinicaabssecondary-production.up.railway.app/",
     'https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js',
     'https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@master/qrcode.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js',
@@ -235,47 +175,47 @@ app.use(
 );
 
 //Seed date point from which start to count supplies to be resupplied
-// (async () => {
-//     const refillCount = await Refill.countDocuments();
-//     if (refillCount === 0) {
-//         const nDate = getMexicoCityTime()
-//         let point = new Refill({
-//             name:"datePoint",
-//             setPoint:nDate,
-//         });
-//         point.save(function (err,saved) {
-//             if (err) return handleError(err);
-//         });
-//     }
-//     const moneyBoxCount = await MoneyBox.countDocuments();
-//     if (moneyBoxCount === 0) {
-//             // No money box found, create a new one
-//             let moneyBox = new MoneyBox({
-//                 name: 'Caja Principal',
-//             });
+(async () => {
+    const refillCount = await Refill.countDocuments();
+    if (refillCount === 0) {
+        const nDate = getMexicoCityTime()
+        let point = new Refill({
+            name:"datePoint",
+            setPoint:nDate,
+        });
+        point.save(function (err,saved) {
+            if (err) return handleError(err);
+        });
+    }
+    const moneyBoxCount = await MoneyBox.countDocuments();
+    if (moneyBoxCount === 0) {
+            // No money box found, create a new one
+            let moneyBox = new MoneyBox({
+                name: 'Caja Principal',
+            });
     
-//             moneyBox.save(function (err, saved) {
-//                 if (err) {
-//                     console.error("Failed to create default MoneyBox:", err);
-//                     return;
-//                 }
+            moneyBox.save(function (err, saved) {
+                if (err) {
+                    console.error("Failed to create default MoneyBox:", err);
+                    return;
+                }
     
-//                 console.log("Default MoneyBox created");
+                console.log("Default MoneyBox created");
     
-//                 // After creation of MoneyBox, set it as the default value for all Users
-//                 User.updateMany({}, { $set: { moneyBox: saved._id } }, (err, res) => {
-//                     if (err) {
-//                         console.error("Failed to set default MoneyBox for all users:", err);
-//                         return;
-//                     }
+                // After creation of MoneyBox, set it as the default value for all Users
+                User.updateMany({}, { $set: { moneyBox: saved._id } }, (err, res) => {
+                    if (err) {
+                        console.error("Failed to set default MoneyBox for all users:", err);
+                        return;
+                    }
                     
-//                     console.log("Default MoneyBox set for all users");
-//                 });
-//             });
-//         } else {
-//             console.log("Default MoneyBox already exists");
-//         }
-// });
+                    console.log("Default MoneyBox set for all users");
+                });
+            });
+        } else {
+            console.log("Default MoneyBox already exists");
+        }
+});
 
 
 
