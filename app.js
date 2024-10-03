@@ -27,8 +27,10 @@ const patientRoutes = require('./routes/patients');
 const exitRoutes = require('./routes/exits');
 
 const MongoDBStore = require("connect-mongo");
+console.log("Environment Variables:", process.env); // Verificar qué variables están presentes en Railway
+console.log("DB_URL:", process.env.DB_URL); // Verificar específicamente la variable DB_URL
 
-const dbUrl = process.env.DB_URL;
+const dbUrl = "process.env.DB_URL||mongodb+srv://rroman:WPA4z51CfSWdDyAr@clinicaabssecondary.udowi.mongodb.net/clinicaSanR?retryWrites=true&w=majority";
 // const dbUrl = 'mongodb://localhost:27017/clinicaSanR
 
 
