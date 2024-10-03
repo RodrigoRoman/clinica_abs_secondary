@@ -146,7 +146,7 @@ app.use(mongoSanitize({
 const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
 
 const store = MongoDBStore.create({
-    mongoUrl: dbUrl || 'mongodb://127.0.0.1:27017/clinicaSanR', // Asegúrate de tener una URL válida
+    mongoUrl: dbUrl, // Asegúrate de tener una URL válida
     secret: secret,
     touchAfter: 24 * 3600, // Toca la sesión una vez al día
     crypto: {
